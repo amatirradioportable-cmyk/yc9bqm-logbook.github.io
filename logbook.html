@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logbook QSO</title>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0d1117;
+    color: white;
+    padding: 20px;
+}
+h2 {
+    text-align: center;
+}
+#uploadBox {
+    margin-bottom: 20px;
+}
+table.dataTable {
+    background: white;
+    color: black;
+}
+.download-btn {
+    background: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+}
+.download-btn:hover {
+    background: #218838;
+}
+</style>
+</head>
+
+<body>
+
+<h2>?? Logbook QSO</h2>
+
+<div id="uploadBox">
+    <input type="file" id="adifFile" accept=".adi,.adif">
+    <button onclick="loadADIF()">Upload ADIF</button>
+</div>
+
+<table id="logTable" class="display">
+    <thead>
+        <tr>
+            <th>Callsign</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Freq</th>
+            <th>Band</th>
+            <th>Mode</th>
+            <th>Download QSL</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+
+let table = new DataTable('#logTable');
+
+function loadADIF() {
+    const fileInput = document.getElementById('adifFile');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Pilih file ADIF dulu admin ??");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        parseADIF(e.target.result);
+    };
+    reader.readAsText(file);
+}
+
+function parseADIF(content) {
+    table.clear();
+
+    let records = content.split("<EOR>");
+    
+    records.forEach(record => {
+
+        function getField(field) {
+            let regex = new RegExp("<" + field + ":(\\d+)[^>]*>([^<]+)", "i");
+            let match = record.match(regex);
+            return match ? match[2] : "";
+        }
+
+        let callsign = getField("CALL");
+        let date = getField("QSO_DATE");
+        let time = getField("TIME_ON");
+        let freq = getField("FREQ");
+        let band = getField("BAND");
+        let mode = getField("MODE");
+
+        if(callsign !== "") {
+            table.row.add([
+                callsign,
+                formatDate(date),
+                formatTime(time),
+                freq,
+                band,
+                mode,
+                `<button class="download-btn" onclick="downloadQSL('${callsign}','${date}','${time}')">Download</button>`
+            ]).draw(false);
+        }
+    });
+}
+
+function formatDate(date) {
+    if(date.length === 8) {
+        return date.substring(6,8) + "-" + date.substring(4,6) + "-" + date.substring(0,4);
+    }
+    return date;
+}
+
+function formatTime(time) {
+    if(time.length >= 4) {
+        return time.substring(0,2) + ":" + time.substring(2,4);
+    }
+    return time;
+}
+
+function downloadQSL(call, date, time) {
+
+    let qslContent = `
+        QSL CONFIRMATION
+        
+        Callsign : ${call}
+        Date     : ${formatDate(date)}
+        Time     : ${formatTime(time)}
+        
+        73 de YC9BQM
+    `;
+
+    let blob = new Blob([qslContent], { type: "text/plain" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = call + "_QSL.txt";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
