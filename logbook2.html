@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Logbook YC9BQM</title>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0d1117;
+    color: white;
+    padding: 20px;
+}
+h2 { text-align:center; }
+
+.form-box {
+    background:#161b22;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+input, select {
+    padding:5px;
+    margin:5px;
+}
+
+button {
+    padding:6px 10px;
+    cursor:pointer;
+}
+
+#clock {
+    font-weight:bold;
+    color:#00ffcc;
+}
+
+table.dataTable {
+    background:white;
+    color:black;
+}
+</style>
+</head>
+
+<body>
+
+<h2>?? Logbook YC9BQM</h2>
+
+<div class="form-box">
+
+Date:
+<input type="date" id="qsoDate">
+
+Time (UTC):
+<span id="clock"></span>
+
+<br>
+
+Callsign Lawan:
+<input type="text" id="callsign">
+
+Freq (MHz):
+<input type="text" id="freq">
+
+Band:
+<select id="band">
+<option>2m</option>
+<option>40m</option>
+<option>80m</option>
+<option>15m</option>
+<option>10m</option>
+<option>20m</option>
+</select>
+
+Mode:
+<select id="mode">
+<option>FT8</option>
+<option>SSB</option>
+<option>FT4</option>
+<option>FM</option>
+<option>RTTY</option>
+<option>CW</option>
+</select>
+
+RST:
+<input type="text" id="rst" placeholder="59">
+
+<button onclick="addQSO()">Tambah QSO</button>
+
+</div>
+
+<table id="logTable" class="display">
+<thead>
+<tr>
+<th>Callsign</th>
+<th>Date</th>
+<th>Time (UTC)</th>
+<th>Freq</th>
+<th>Band</th>
+<th>Mode</th>
+<th>RST</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+
+let table = new DataTable('#logTable');
+
+// Set default date hari ini
+document.getElementById("qsoDate").valueAsDate = new Date();
+
+// Clock UTC real-time
+function updateClock() {
+    let now = new Date();
+    let utcHours = String(now.getUTCHours()).padStart(2,'0');
+    let utcMinutes = String(now.getUTCMinutes()).padStart(2,'0');
+    let utcSeconds = String(now.getUTCSeconds()).padStart(2,'0');
+    document.getElementById("clock").innerHTML = 
+        utcHours + ":" + utcMinutes + ":" + utcSeconds;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function addQSO() {
+
+    let call = document.getElementById("callsign").value.toUpperCase();
+    let date = document.getElementById("qsoDate").value;
+    let time = document.getElementById("clock").innerHTML;
+    let freq = document.getElementById("freq").value;
+    let band = document.getElementById("band").value;
+    let mode = document.getElementById("mode").value;
+    let rst = document.getElementById("rst").value;
+
+    if(call === "") {
+        alert("Isi callsign dulu admin ??");
+        return;
+    }
+
+    table.row.add([
+        call,
+        date,
+        time,
+        freq,
+        band,
+        mode,
+        rst
+    ]).draw(false);
+
+    document.getElementById("callsign").value = "";
+    document.getElementById("freq").value = "";
+    document.getElementById("rst").value = "";
+}
+
+</script>
+
+</body>
+</html>
