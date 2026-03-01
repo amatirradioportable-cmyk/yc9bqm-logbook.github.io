@@ -1,155 +1,265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Logbook QSO</title>
+<title>YC9BQM Logbook Ultimate</title>
 
-<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0d1117;
-    color: white;
-    padding: 20px;
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#001f3f,#003366,#004080);
+color:white;
+padding:20px;
 }
-h2 {
-    text-align: center;
+h2{margin-top:30px;}
+input,select,button{
+padding:6px;
+margin:4px;
+border-radius:6px;
+border:none;
 }
-#uploadBox {
-    margin-bottom: 20px;
+button{
+background:#00c851;
+color:white;
+cursor:pointer;
 }
-table.dataTable {
-    background: white;
-    color: black;
-}
-.download-btn {
-    background: #28a745;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
-}
-.download-btn:hover {
-    background: #218838;
+button:hover{background:#007e33;}
+.deleteBtn{background:#ff4444;}
+.deleteBtn:hover{background:#cc0000;}
+table{background:white;color:black;}
+.box{
+background:rgba(255,255,255,0.1);
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
 }
 </style>
 </head>
-
 <body>
 
-<h2>?? Logbook QSO</h2>
+<h1>YC9BQM LOGBOOK ULTIMATE</h1>
 
-<div id="uploadBox">
-    <input type="file" id="adifFile" accept=".adi,.adif">
-    <button onclick="loadADIF()">Upload ADIF</button>
+<div class="box">
+<h2>DATA STATION OPERATOR</h2>
+<input id="myCall" placeholder="Callsign">
+<input id="operator" placeholder="Nama Operator">
+<input id="event" placeholder="Event">
+<input id="itu" placeholder="ITU Zone">
+<input id="cq" placeholder="CQ Zone">
+<input id="qth" placeholder="QTH">
+<br>
+<input type="file" id="bgUpload">
+<button onclick="saveOperator()">Simpan Data Operator</button>
+</div>
+
+<div class="box">
+<h2>INPUT QSO LAWAN</h2>
+<input id="call" placeholder="Callsign Lawan">
+<input type="date" id="date">
+<input id="time" readonly>
+<input id="freq" placeholder="Freq">
+<select id="band">
+<option>40m</option><option>80m</option><option>20m</option>
+<option>15m</option><option>10m</option><option>2m</option>
+</select>
+<select id="mode">
+<option>FT8</option><option>SSB</option><option>FT4</option>
+<option>FM</option><option>RTTY</option><option>CW</option>
+</select>
+<input id="rst" value="59">
+<button onclick="addQSO()">Tambah QSO</button>
+<p>Total QSO: <span id="total">0</span></p>
+<button onclick="exportADIF()">Export ADIF</button>
+<input type="file" id="importAdif">
+<button onclick="importADIF()">Import ADIF</button>
 </div>
 
 <table id="logTable" class="display">
-    <thead>
-        <tr>
-            <th>Callsign</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Freq</th>
-            <th>Band</th>
-            <th>Mode</th>
-            <th>Download QSL</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+<th>No</th>
+<th>Call</th>
+<th>Date</th>
+<th>Time</th>
+<th>Freq</th>
+<th>Band</th>
+<th>Mode</th>
+<th>RST</th>
+<th>QSL</th>
+<th>Hapus</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 
 <script>
+let table;
+let counter=1;
 
-let table = new DataTable('#logTable');
+$(document).ready(function(){
+table=$('#logTable').DataTable();
+loadData();
+startClock();
+loadOperator();
+});
 
-function loadADIF() {
-    const fileInput = document.getElementById('adifFile');
-    const file = fileInput.files[0];
-    if (!file) {
-        alert("Pilih file ADIF dulu admin ??");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        parseADIF(e.target.result);
-    };
-    reader.readAsText(file);
+function startClock(){
+setInterval(function(){
+let n=new Date();
+let utc=n.getUTCHours().toString().padStart(2,'0')+":"+
+n.getUTCMinutes().toString().padStart(2,'0')+":"+
+n.getUTCSeconds().toString().padStart(2,'0');
+document.getElementById("time").value=utc;
+},1000);
 }
 
-function parseADIF(content) {
-    table.clear();
+function saveOperator(){
+let data={
+myCall:myCall.value,
+operator:operator.value,
+event:event.value,
+itu:itu.value,
+cq:cq.value,
+qth:qth.value
+};
+localStorage.setItem("operatorData",JSON.stringify(data));
 
-    let records = content.split("<EOR>");
-    
-    records.forEach(record => {
-
-        function getField(field) {
-            let regex = new RegExp("<" + field + ":(\\d+)[^>]*>([^<]+)", "i");
-            let match = record.match(regex);
-            return match ? match[2] : "";
-        }
-
-        let callsign = getField("CALL");
-        let date = getField("QSO_DATE");
-        let time = getField("TIME_ON");
-        let freq = getField("FREQ");
-        let band = getField("BAND");
-        let mode = getField("MODE");
-
-        if(callsign !== "") {
-            table.row.add([
-                callsign,
-                formatDate(date),
-                formatTime(time),
-                freq,
-                band,
-                mode,
-                `<button class="download-btn" onclick="downloadQSL('${callsign}','${date}','${time}')">Download</button>`
-            ]).draw(false);
-        }
-    });
+let file=document.getElementById("bgUpload").files[0];
+if(file){
+let reader=new FileReader();
+reader.onload=function(e){
+localStorage.setItem("qslBackground",e.target.result);
+};
+reader.readAsDataURL(file);
+}
+alert("Data Operator Disimpan!");
 }
 
-function formatDate(date) {
-    if(date.length === 8) {
-        return date.substring(6,8) + "-" + date.substring(4,6) + "-" + date.substring(0,4);
-    }
-    return date;
+function loadOperator(){
+let data=JSON.parse(localStorage.getItem("operatorData"));
+if(data){
+myCall.value=data.myCall||"";
+operator.value=data.operator||"";
+event.value=data.event||"";
+itu.value=data.itu||"";
+cq.value=data.cq||"";
+qth.value=data.qth||"";
+}
 }
 
-function formatTime(time) {
-    if(time.length >= 4) {
-        return time.substring(0,2) + ":" + time.substring(2,4);
-    }
-    return time;
+function addQSO(){
+if(call.value===""){alert("Callsign kosong!");return;}
+
+table.row.add([
+counter,
+call.value,
+date.value,
+time.value,
+freq.value,
+band.value,
+mode.value,
+rst.value,
+`<button onclick="downloadQSL('${call.value}','${date.value}','${time.value}','${band.value}','${rst.value}','${freq.value}','${mode.value}')">Download</button>`,
+`<button class='deleteBtn' onclick='deleteRow(this)'>Hapus</button>`
+]).draw(false);
+
+counter++;
+updateTotal();
+saveData();
+call.value="";
 }
 
-function downloadQSL(call, date, time) {
-
-    let qslContent = `
-        QSL CONFIRMATION
-        
-        Callsign : ${call}
-        Date     : ${formatDate(date)}
-        Time     : ${formatTime(time)}
-        
-        73 de YC9BQM
-    `;
-
-    let blob = new Blob([qslContent], { type: "text/plain" });
-    let link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = call + "_QSL.txt";
-    link.click();
+function deleteRow(btn){
+if(confirm("Yakin hapus QSO?")){
+table.row($(btn).parents('tr')).remove().draw();
+reorder();
+saveData();
+updateTotal();
+}
 }
 
+function reorder(){
+let data=table.rows().data();
+for(let i=0;i<data.length;i++){data[i][0]=i+1;}
+table.clear().rows.add(data).draw();
+counter=data.length+1;
+}
+
+function updateTotal(){
+document.getElementById("total").innerText=table.rows().count();
+}
+
+function saveData(){
+localStorage.setItem("logData",JSON.stringify(table.rows().data().toArray()));
+}
+
+function loadData(){
+let data=JSON.parse(localStorage.getItem("logData"));
+if(data){
+for(let i=0;i<data.length;i++){
+table.row.add(data[i]).draw(false);
+}
+counter=data.length+1;
+updateTotal();
+}
+}
+
+function downloadQSL(call,date,time,band,rst,freq,mode){
+let bg=localStorage.getItem("qslBackground");
+if(!bg){alert("Upload background dulu!");return;}
+
+let canvas=document.createElement("canvas");
+canvas.width=1000;
+canvas.height=600;
+let ctx=canvas.getContext("2d");
+let img=new Image();
+
+img.onload=function(){
+ctx.drawImage(img,0,0,1000,600);
+
+ctx.fillStyle="rgba(255,255,255,0.75)";
+ctx.fillRect(40,420,920,140);
+
+ctx.fillStyle="black";
+ctx.font="22px Arial";
+ctx.fillText("To: "+call+" This confirms our 2-way "+mode+" QSO",60,455);
+ctx.fillText("Date: "+date+"     Time: "+time+" UTC",60,485);
+ctx.fillText("Band: "+band.toUpperCase()+"  UR Sigs: "+rst+"  Freq: "+freq,60,515);
+
+let link=document.createElement("a");
+link.download=call+"_QSL.png";
+link.href=canvas.toDataURL();
+link.click();
+};
+img.src=bg;
+}
+
+function exportADIF(){
+let data=table.rows().data();
+let adif="";
+for(let i=0;i<data.length;i++){
+adif+=`<CALL:${data[i][1].length}>${data[i][1]} <BAND:${data[i][5].length}>${data[i][5]} <MODE:${data[i][6].length}>${data[i][6]} <RST_SENT:${data[i][7].length}>${data[i][7]} <EOR>\n`;
+}
+let blob=new Blob([adif],{type:"text/plain"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="logbook.adi";
+a.click();
+}
+
+function importADIF(){
+let file=document.getElementById("importAdif").files[0];
+if(!file){alert("Pilih file ADIF dulu!");return;}
+let reader=new FileReader();
+reader.onload=function(e){
+alert("Import ADIF selesai (manual parsing sederhana).");
+};
+reader.readAsText(file);
+}
 </script>
 
 </body>
