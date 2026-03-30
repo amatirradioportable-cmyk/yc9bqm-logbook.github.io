@@ -1,187 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>YC9BQM Portable Logbook</title>
+<title>Cek Sertifikat QSO</title>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
 <style>
-
-body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#020617;
-    color:white;
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
+  padding: 20px;
 }
 
-.header{
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    padding:30px;
-    text-align:center;
+h1 {
+  margin-bottom: 5px;
 }
 
-.menu{
-    text-align:center;
-    padding:15px;
-    background:#0f172a;
+.subtitle {
+  margin-bottom: 20px;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-.menu a{
-    color:white;
-    margin:0 15px;
-    text-decoration:none;
-    font-weight:bold;
+.container {
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
-.banner{
-    text-align:center;
-    padding:30px;
+a.download-btn {
+  background: #28a745;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
 }
 
-.banner img{
-    width:90%;
-    max-width:900px;
-    border-radius:15px;
+a.download-btn:hover {
+  background: #218838;
 }
 
-.card{
-    background:#0f172a;
-    padding:30px;
-    margin:30px auto;
-    max-width:900px;
-    border-radius:15px;
-    text-align:center;
+.dataTables_filter input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
-
-button{
-    background:#22c55e;
-    border:none;
-    padding:12px 20px;
-    margin:5px;
-    border-radius:8px;
-    cursor:pointer;
-    color:white;
-    font-weight:bold;
-}
-
-button:hover{
-    background:#16a34a;
-}
-
-.table-container{
-    background:white;
-    color:black;
-    padding:15px;
-    border-radius:10px;
-}
-
-footer{
-    text-align:center;
-    padding:20px;
-    opacity:0.6;
-}
-
 </style>
+
 </head>
 
 <body>
 
-<div class="header">
-    <h1>YC9BQM</h1>
-    <p>ORLOK TABANAN — ORDA BALI — INDONESIA</p>
+<h1>?? CEK SERTIFIKAT QSO</h1>
+<div class="subtitle">Silakan masukkan callsign Anda</div>
+
+<div class="container">
+  <table id="tabel" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>Callsign</th>
+        <th>Download Sertifikat</th>
+      </tr>
+    </thead>
+  </table>
 </div>
 
-<div class="menu">
-    <a href="#">Home</a>
-    <a href="#logbook">Logbook</a>
-    <a href="#qsl">Request QSL</a>
-</div>
-
-<div class="banner">
-    <div style="max-width:1000px; margin:auto;">
-    <img src="banner.png" style="width:100%; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.4);">
-</div>
-
-<div class="card">
-
-<h2>Operator: SUHARIYANTO</h2>
-<p>Portable Amateur Radio Station — Tabanan, Bali</p>
-
-<h3>Online Log Services</h3>
-
-<a href="https://www.eqsl.cc" target="_blank">
-<button>eQSL.cc</button>
-</a>
-
-<a href="https://lotw.arrl.org" target="_blank">
-<button>LoTW</button>
-</a>
-
-<a href="https://www.hrdlog.net" target="_blank">
-<button>HRDLog</button>
-</a>
-
-</div>
-
-<div id="logbook" class="card">
-
-<h2>Logbook YC9BQM</h2>
-
-<div class="table-container">
-
-<table id="logTable" class="display">
-
-<thead>
-<tr>
-<th>Date</th>
-<th>Time</th>
-<th>Callsign</th>
-<th>Band</th>
-<th>Mode</th>
-<th>RST</th>
-</tr>
-</thead>
-
-<tbody>
-<tr><td>2025-01-01</td><td>12:00</td><td>JA1ABC</td><td>20m</td><td>SSB</td><td>59</td></tr>
-<tr><td>2025-01-02</td><td>13:30</td><td>VK2XYZ</td><td>40m</td><td>FT8</td><td>-10</td></tr>
-<tr><td>2025-01-03</td><td>09:15</td><td>YF9BSZ</td><td>15m</td><td>CW</td><td>579</td></tr>
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<div id="qsl" class="card">
-
-<h2>Request QSL</h2>
-
-<form>
-<input type="text" placeholder="Callsign" style="padding:10px;width:80%;margin:5px;"><br>
-<input type="date" style="padding:10px;width:80%;margin:5px;"><br>
-<input type="text" placeholder="Band / Mode" style="padding:10px;width:80%;margin:5px;"><br>
-<textarea placeholder="Message" style="padding:10px;width:80%;margin:5px;"></textarea><br>
-<button type="submit">Send Request</button>
-</form>
-
-</div>
-
-<footer>
-© YC9BQM Portable Station
-</footer>
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    $('#logTable').DataTable();
-});
+
+// ?? ID GOOGLE SHEETS ADMIN
+var sheetID = "1SRFhhcyXDiXGziHdfy88r9rOAK481OC53kiz0p0xBr0";
+
+// ?? NAMA SHEET (biasanya Sheet1)
+var sheetName = "Sheet1";
+
+// ambil data dari Google Sheets
+var url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => {
+
+    let dataset = [];
+
+    data.forEach(row => {
+      dataset.push([
+        row.CALLSIGN,
+        `<a class="download-btn" href="${row.LINK}" target="_blank">Download</a>`
+      ]);
+    });
+
+    $('#tabel').DataTable({
+      data: dataset,
+      pageLength: 10,
+      language: {
+        search: "?? Cari Callsign:",
+        lengthMenu: "Tampilkan _MENU_ data",
+        info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+        paginate: {
+          previous: "Prev",
+          next: "Next"
+        }
+      }
+    });
+
+  });
+
 </script>
 
 </body>
